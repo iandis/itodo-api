@@ -9,6 +9,8 @@ export class ConfigService {
 
   private readonly _env = from(this._processEnv);
 
+  public readonly IS_DEV: boolean = this._env.get('DEV').asBool() || false;
+
   public readonly PORT: number = this._env
     .get('PORT')
     .required()
