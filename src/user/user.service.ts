@@ -33,18 +33,14 @@ export class UserService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      let user: User = {
-        id: userId,
-      } as User;
+      const user: User = new User();
+      user.id = userId;
 
       if (userCreateInput) {
-        user = {
-          ...user,
-          ...userCreateInput,
-        } as User;
+        Object.assign(user, userCreateInput);
       }
 
-      await queryRunner.manager.save(user);
+      await queryRunner.manager.insert(User, user);
       await queryRunner.commitTransaction();
 
       return user;
@@ -63,18 +59,21 @@ export class UserService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const oldUser: User | null = await this.findOneById(userId);
-      if (!oldUser) {
+      const user: User | null = await this.findOneById(userId);
+      if (!user) {
         throw new ApolloError('User not found.', 'USER_NOT_FOUND');
       }
-      const newUser: User = {
-        ...oldUser,
-        ...userUpdateInput,
-      } as User;
-      await queryRunner.manager.save(newUser);
+      Object.assign(user, userUpdateInput);
+      await queryRunner.manager.update(
+        User,
+        {
+          where: { id: userId },
+        },
+        user,
+      );
       await queryRunner.commitTransaction();
 
-      return newUser;
+      return user;
     } catch (err) {
       Logger.error(err.message, err.stack, '[UserService.update]');
       await queryRunner.rollbackTransaction();
