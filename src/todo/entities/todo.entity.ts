@@ -1,3 +1,4 @@
+import { User } from 'src/user/entities/user.entity';
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { TodoStatus } from '../dto/shared/todo-status.enum';
 
@@ -9,7 +10,7 @@ export class Todo extends BaseEntity {
   })
   id: string;
 
-  @ManyToOne(() => String)
+  @ManyToOne(() => User, user => user.id)
   @Column({
     type: 'varchar',
     length: 50,
