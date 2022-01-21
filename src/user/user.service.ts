@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApolloError } from 'apollo-server-errors';
 import { Connection, Repository } from 'typeorm';
+import { UserCreateInput } from './dto/request/user-create.input';
 import { UserUpdateInput } from './dto/request/user-update.input';
 import { UserResponse } from './dto/response/user.response';
 import { User } from './entities/user.entity';
@@ -24,14 +25,24 @@ export class UserService {
     }
   }
 
-  async create(userId: string): Promise<UserResponse> {
+  async create(
+    userId: string,
+    userCreateInput?: UserCreateInput,
+  ): Promise<UserResponse> {
     const queryRunner = this._connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const user: User = {
+      let user: User = {
         id: userId,
       } as User;
+
+      if (userCreateInput) {
+        user = {
+          ...user,
+          ...userCreateInput,
+        } as User;
+      }
 
       await queryRunner.manager.save(user);
       await queryRunner.commitTransaction();

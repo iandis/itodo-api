@@ -12,12 +12,16 @@ export class UserResolver {
   constructor(private readonly _userService: UserService) {}
 
   @Mutation(() => UserResponse)
-  registerUser(@CurrentUser() userId: string): Promise<UserResponse> {
-    return this._userService.create(userId);
+  userCreate(
+    @CurrentUser() userId: string,
+    @Args('userCreateInput', { nullable: true })
+    userCreateInput?: UserUpdateInput,
+  ): Promise<UserResponse> {
+    return this._userService.create(userId, userCreateInput);
   }
 
   @Mutation(() => UserResponse)
-  updateUser(
+  userUpdate(
     @CurrentUser() userId: string,
     @Args('userUpdateInput') userUpdateInput: UserUpdateInput,
   ): Promise<UserResponse> {
