@@ -1,5 +1,5 @@
-import { InputType, PartialType } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
 import { PaginationInput } from 'src/shared/dto/common/pagination.input';
 
 @InputType()
-export class TodoListInput extends PartialType(PaginationInput) {}
+export class TodoListInput extends PaginationInput {}
