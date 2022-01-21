@@ -26,6 +26,11 @@ import { User } from 'src/user/entities/user.entity';
           ssl: {
             ca: config.SSL_CERT,
           },
+          extra: {
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          },
         };
       },
     }),
