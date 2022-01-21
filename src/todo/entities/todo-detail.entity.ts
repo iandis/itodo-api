@@ -1,5 +1,5 @@
 import { Column, Entity } from 'typeorm';
-import {Todo} from './todo.entity';
+import { Todo } from './todo.entity';
 
 @Entity('todos')
 export class TodoDetail extends Todo {

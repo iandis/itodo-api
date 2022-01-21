@@ -1,5 +1,5 @@
 import { User } from 'src/user/entities/user.entity';
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 import { TodoStatus } from '../dto/shared/todo-status.enum';
 
 @Entity('todos')
@@ -10,7 +10,7 @@ export class Todo extends BaseEntity {
   })
   id: string;
 
-  @ManyToOne(() => User, user => user.id)
+  @OneToOne(() => User, (user) => user.id)
   @Column({
     type: 'varchar',
     length: 50,
@@ -32,19 +32,20 @@ export class Todo extends BaseEntity {
   subtitle: string;
 
   @Column({
-    type: 'varchar',
-    length: 15,
+    type: 'enum',
+    enum: TodoStatus,
+    enumName: 'todo_status',
   })
   status: TodoStatus;
 
   @Column({
-    type: 'date',
+    type: 'timestamptz',
     name: 'created_at',
   })
   createdAt: Date;
 
   @Column({
-    type: 'date',
+    type: 'timestamptz',
     name: 'updated_at',
   })
   updatedAt: Date;
