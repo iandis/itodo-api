@@ -12,6 +12,6 @@ export class TodoCreateInput {
   @Field(() => String, { nullable: true })
   description: string;
 
-  @Field(() => String)
+  @Field(() => TodoStatus)
   status: TodoStatus;
 }

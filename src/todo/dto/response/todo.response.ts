@@ -1,5 +1,10 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { TodoStatus } from '../shared/todo-status.enum';
+
+registerEnumType(TodoStatus, {
+  name: 'TodoStatus',
+  description: 'The status of the todo',
+});
 
 @ObjectType()
 export class TodoResponse {
@@ -12,7 +17,7 @@ export class TodoResponse {
   @Field(() => String, { nullable: true })
   subtitle: string;
 
-  @Field(() => String)
+  @Field(() => TodoStatus)
   status: TodoStatus;
 
   @Field(() => Date)
