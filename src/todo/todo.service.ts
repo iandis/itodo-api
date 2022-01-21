@@ -75,14 +75,15 @@ export class TodoService {
     try {
       const todoId: string = uuidv4();
       const createdAt: Date = new Date();
-      const newTodo: TodoDetail = {
+      const newTodo: TodoDetail = Object.assign(new TodoDetail(), {
+        ...todoCreateInput,
         id: todoId,
         userId: userId,
         createdAt: createdAt,
         updatedAt: createdAt,
-        ...todoCreateInput,
-      } as TodoDetail;
-      await queryRunner.manager.save<TodoDetail>(newTodo);
+      });
+      const result = await queryRunner.manager.insert(TodoDetail, newTodo);
+      Logger.log(JSON.stringify(result), '[TodoService.create]');
       return newTodo;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.create]');
@@ -101,12 +102,18 @@ export class TodoService {
       const { id, ...newTodo } = todoUpdateInput;
       const oldTodo: TodoDetail = await this._internalFindOneById(id);
       const updatedAt: Date = new Date();
-      const updatedTodo: TodoDetail = {
+      const updatedTodo: TodoDetail = Object.assign(new TodoDetail(), {
         ...oldTodo,
         ...newTodo,
         updatedAt: updatedAt,
-      } as TodoDetail;
-      await queryRunner.manager.save<TodoDetail>(updatedTodo);
+      });
+      await queryRunner.manager.update(
+        TodoDetail,
+        {
+          where: { id: id },
+        },
+        updatedTodo,
+      );
       return { success: true } as TodoUpdateResponse;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.update]');
