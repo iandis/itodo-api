@@ -9,7 +9,9 @@ export class ConfigService {
 
   private readonly _env = from(this._processEnv);
 
-  public readonly IS_DEV: boolean = this._env.get('DEV').asBool() || false;
+  public readonly IS_DEV: boolean = this._env.get('NODE_ENV').asString() !== 'production';
+
+  public readonly SSL_CERT: string = this._env.get('SSL_CERT').asString();
 
   public readonly PORT: number = this._env
     .get('PORT')
