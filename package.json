@@ -6,7 +6,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "prebuild": "wget -P credentials https://firebasestorage.googleapis.com/v0/b/itodo-api.appspot.com/o/credentials%2Ffirebase-admin-service-account.json?alt=media&token=04fea85c-b246-4b3f-9b3c-a36752eba9b2 && rimraf dist",
+    "prebuild": "mkdir credentials && curl -o credentials/firebase-admin-service-account.json https://firebasestorage.googleapis.com/v0/b/itodo-api.appspot.com/o/credentials%2Ffirebase-admin-service-account.json?alt=media&token=04fea85c-b246-4b3f-9b3c-a36752eba9b2 && rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
