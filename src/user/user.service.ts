@@ -48,6 +48,8 @@ export class UserService {
       Logger.error(err.message, err.stack, '[UserService.create]');
       await queryRunner.rollbackTransaction();
       throw new ApolloError('Failed to create user.', 'USER_CREATE_FAILED');
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -78,6 +80,8 @@ export class UserService {
       Logger.error(err.message, err.stack, '[UserService.update]');
       await queryRunner.rollbackTransaction();
       throw new ApolloError('Failed to update user.', 'USER_UPDATE_FAILED');
+    } finally {
+      await queryRunner.release();
     }
   }
 }
