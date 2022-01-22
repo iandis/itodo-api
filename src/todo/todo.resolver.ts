@@ -9,9 +9,9 @@ import { TodoListInput } from './dto/request/todo-list.input';
 import { TodoUpdateInput } from './dto/request/todo-update.input';
 import { TodoCreateResponse } from './dto/response/todo-create.response';
 import { TodoDeleteResponse } from './dto/response/todo-delete.response';
-import { TodoDetailResponse } from './dto/response/todo-detail.response';
 import { TodoListResponse } from './dto/response/todo-list.response';
 import { TodoUpdateResponse } from './dto/response/todo-update.response';
+import { TodoResponse } from './dto/response/todo.response';
 import { TodoService } from './todo.service';
 
 @Resolver()
@@ -29,11 +29,11 @@ export class TodoResolver {
     return this._todoService.fetch(userId, todoListInput);
   }
 
-  @Query(() => TodoDetailResponse)
+  @Query(() => TodoResponse)
   todoDetail(
     @Args('todoDetailInput')
     todoDetailInput: TodoDetailInput,
-  ): Promise<TodoDetailResponse> {
+  ): Promise<TodoResponse> {
     return this._todoService.findOneById(todoDetailInput);
   }
 

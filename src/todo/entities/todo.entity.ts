@@ -32,6 +32,12 @@ export class Todo extends BaseEntity {
   subtitle: string;
 
   @Column({
+    type: 'text',
+    nullable: true,
+  })
+  description: string;
+
+  @Column({
     type: 'enum',
     enum: TodoStatus,
     enumName: 'todo_status',

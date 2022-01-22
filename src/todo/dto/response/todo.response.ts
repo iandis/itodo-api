@@ -17,6 +17,9 @@ export class TodoResponse {
   @Field(() => String, { nullable: true })
   subtitle: string;
 
+  @Field(() => String, { nullable: true })
+  description: string;
+
   @Field(() => TodoStatus)
   status: TodoStatus;
 

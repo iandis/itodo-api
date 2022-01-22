@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from 'src/config/config.module';
 import { ConfigService } from 'src/config/config.service';
-import { TodoDetail } from 'src/todo/entities/todo-detail.entity';
 import { Todo } from 'src/todo/entities/todo.entity';
 import { User } from 'src/user/entities/user.entity';
 
@@ -21,7 +20,7 @@ import { User } from 'src/user/entities/user.entity';
           password: config.DB_PASSWORD,
           database: config.DB_DATABASE,
           keepConnectionAlive: true,
-          entities: [Todo, TodoDetail, User],
+          entities: [Todo, User],
           synchronize: false,
           ssl: config.SSL_CONFIG,
           extra: {

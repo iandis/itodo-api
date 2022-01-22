@@ -6,22 +6,19 @@ import { TodoCreateInput } from './dto/request/todo-create.input';
 import { TodoListInput } from './dto/request/todo-list.input';
 import { TodoDetailInput } from './dto/request/todo-detail.input';
 import { TodoCreateResponse } from './dto/response/todo-create.response';
-import { TodoDetailResponse } from './dto/response/todo-detail.response';
-import { TodoDetail } from './entities/todo-detail.entity';
 import { Todo } from './entities/todo.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { TodoUpdateInput } from './dto/request/todo-update.input';
 import { TodoUpdateResponse } from './dto/response/todo-update.response';
 import { TodoDeleteResponse } from './dto/response/todo-delete.response';
 import { TodoListResponse } from './dto/response/todo-list.response';
+import { TodoResponse } from './dto/response/todo.response';
 
 @Injectable()
 export class TodoService {
   constructor(
     @InjectRepository(Todo)
     private readonly _todoRepository: Repository<Todo>,
-    @InjectRepository(TodoDetail)
-    private readonly _todoDetailRepository: Repository<TodoDetail>,
     private readonly _connection: Connection,
   ) {}
 
@@ -47,12 +44,10 @@ export class TodoService {
     }
   }
 
-  async findOneById(
-    todoDetailInput: TodoDetailInput,
-  ): Promise<TodoDetailResponse> {
+  async findOneById(todoDetailInput: TodoDetailInput): Promise<TodoResponse> {
     const { id } = todoDetailInput;
     try {
-      const todo: TodoDetail = await this._internalFindOneById(id);
+      const todo: Todo = await this._internalFindOneById(id);
       return todo;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.findOneById]');
@@ -60,8 +55,8 @@ export class TodoService {
     }
   }
 
-  private async _internalFindOneById(id: string): Promise<TodoDetail> {
-    const todo: TodoDetail = await this._todoDetailRepository.findOne(id);
+  private async _internalFindOneById(id: string): Promise<Todo> {
+    const todo: Todo = await this._todoRepository.findOne(id);
     return todo;
   }
 
@@ -75,14 +70,14 @@ export class TodoService {
     try {
       const todoId: string = uuidv4();
       const createdAt: Date = new Date();
-      const newTodo: TodoDetail = Object.assign(new TodoDetail(), {
+      const newTodo: Todo = Object.assign(new Todo(), {
         ...todoCreateInput,
         id: todoId,
         userId: userId,
         createdAt: createdAt,
         updatedAt: createdAt,
       });
-      const result = await queryRunner.manager.insert(TodoDetail, newTodo);
+      const result = await queryRunner.manager.insert(Todo, newTodo);
       Logger.log(JSON.stringify(result), '[TodoService.create]');
       return newTodo;
     } catch (err) {
@@ -100,15 +95,15 @@ export class TodoService {
     await queryRunner.startTransaction();
     try {
       const { id, ...newTodo } = todoUpdateInput;
-      const oldTodo: TodoDetail = await this._internalFindOneById(id);
+      const oldTodo: Todo = await this._internalFindOneById(id);
       const updatedAt: Date = new Date();
-      const updatedTodo: TodoDetail = Object.assign(new TodoDetail(), {
+      const updatedTodo: Todo = Object.assign(new Todo(), {
         ...oldTodo,
         ...newTodo,
         updatedAt: updatedAt,
       });
       await queryRunner.manager.update(
-        TodoDetail,
+        Todo,
         {
           where: { id: id },
         },
