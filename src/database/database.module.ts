@@ -23,9 +23,7 @@ import { User } from 'src/user/entities/user.entity';
           keepConnectionAlive: true,
           entities: [Todo, TodoDetail, User],
           synchronize: false,
-          ssl: {
-            ca: config.SSL_CERT,
-          },
+          ssl: config.SSL_CONFIG,
           extra: {
             ssl: {
               rejectUnauthorized: false,
