@@ -1,5 +1,5 @@
 import { ObjectType } from '@nestjs/graphql';
-import { TodoDetailResponse } from './todo-detail.response';
+import { TodoResponse } from './todo.response';
 
 @ObjectType()
-export class TodoCreateResponse extends TodoDetailResponse {}
+export class TodoCreateResponse extends TodoResponse {}
