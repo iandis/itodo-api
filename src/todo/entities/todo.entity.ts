@@ -10,7 +10,9 @@ export class Todo extends BaseEntity {
   })
   id: string;
 
-  @OneToOne(() => User, (user) => user.id)
+  @OneToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE',
+  })
   @Column({
     type: 'varchar',
     length: 50,
