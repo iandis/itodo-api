@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ApolloError } from 'apollo-server-errors';
 import { Connection, Repository } from 'typeorm';
 import { TodoCreateInput } from './dto/request/todo-create.input';
 import { TodoListInput } from './dto/request/todo-list.input';
@@ -13,6 +12,9 @@ import { TodoUpdateResponse } from './dto/response/todo-update.response';
 import { TodoDeleteResponse } from './dto/response/todo-delete.response';
 import { TodoListResponse } from './dto/response/todo-list.response';
 import { TodoResponse } from './dto/response/todo.response';
+import { ServerError } from 'src/shared/errors/server.error';
+import { ApolloError } from 'apollo-server-express';
+import { RequestError } from 'src/shared/errors/request.error';
 
 @Injectable()
 export class TodoService {
@@ -40,7 +42,7 @@ export class TodoService {
       return todoList;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.fetch]');
-      throw new ApolloError('Failed to fetch todos.', 'TODO_FETCH_FAILED');
+      throw new ServerError('Failed to fetch todos.', 'TODO_FETCH_FAILED');
     }
   }
 
@@ -51,12 +53,14 @@ export class TodoService {
       return todo;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.findOneById]');
-      throw new ApolloError('Failed to find todo.', 'TODO_FIND_FAILED');
+      throw new ServerError('Failed to find todo.', 'TODO_FIND_FAILED');
     }
   }
 
   private async _internalFindOneById(id: string): Promise<Todo> {
-    const todo: Todo = await this._todoRepository.findOne(id);
+    const todo: Todo = await this._todoRepository.findOne({
+      where: { id },
+    });
     return todo;
   }
 
@@ -71,19 +75,20 @@ export class TodoService {
       const todoId: string = uuidv4();
       const createdAt: Date = new Date();
       const newTodo: Todo = Object.assign(new Todo(), {
-        ...todoCreateInput,
         id: todoId,
         userId: userId,
+        ...todoCreateInput,
         createdAt: createdAt,
         updatedAt: createdAt,
       });
-      const result = await queryRunner.manager.insert(Todo, newTodo);
-      Logger.log(JSON.stringify(result), '[TodoService.create]');
+      await queryRunner.manager.insert(Todo, newTodo);
+      await queryRunner.commitTransaction();
+
       return newTodo;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.create]');
       await queryRunner.rollbackTransaction();
-      throw new ApolloError('Failed to create todo.', 'TODO_CREATE_FAILED');
+      throw new ServerError('Failed to create todo.', 'TODO_CREATE_FAILED');
     } finally {
       await queryRunner.release();
     }
@@ -96,24 +101,26 @@ export class TodoService {
     try {
       const { id, ...newTodo } = todoUpdateInput;
       const oldTodo: Todo = await this._internalFindOneById(id);
+      if (!oldTodo) {
+        throw new RequestError('Todo not found.', 'TODO_NOT_FOUND');
+      }
       const updatedAt: Date = new Date();
       const updatedTodo: Todo = Object.assign(new Todo(), {
         ...oldTodo,
         ...newTodo,
         updatedAt: updatedAt,
       });
-      await queryRunner.manager.update(
-        Todo,
-        {
-          where: { id: id },
-        },
-        updatedTodo,
-      );
-      return { success: true } as TodoUpdateResponse;
+      await queryRunner.manager.update(Todo, updatedTodo.id, updatedTodo);
+      await queryRunner.commitTransaction();
+
+      return updatedTodo;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.update]');
       await queryRunner.rollbackTransaction();
-      throw new ApolloError('Failed to update todo.', 'TODO_UPDATE_FAILED');
+      if (err instanceof ApolloError) {
+        throw err;
+      }
+      throw new ServerError('Failed to update todo.', 'TODO_UPDATE_FAILED');
     } finally {
       await queryRunner.release();
     }
@@ -125,11 +132,13 @@ export class TodoService {
     await queryRunner.startTransaction();
     try {
       await queryRunner.manager.delete(Todo, { id });
+      await queryRunner.commitTransaction();
+
       return { success: true } as TodoDeleteResponse;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.delete]');
       await queryRunner.rollbackTransaction();
-      throw new ApolloError('Failed to delete todo.', 'TODO_DELETE_FAILED');
+      throw new ServerError('Failed to delete todo.', 'TODO_DELETE_FAILED');
     } finally {
       await queryRunner.release();
     }
