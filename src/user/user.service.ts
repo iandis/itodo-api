@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApolloError } from 'apollo-server-errors';
+import { RequestError } from 'src/shared/errors/request.error';
+import { ServerError } from 'src/shared/errors/server.error';
 import { Connection, Repository } from 'typeorm';
 import { UserCreateInput } from './dto/request/user-create.input';
 import { UserUpdateInput } from './dto/request/user-update.input';
@@ -17,7 +19,9 @@ export class UserService {
 
   async findOneById(id: string): Promise<User | null> {
     try {
-      const user: User = await this._userRepository.findOne(id);
+      const user: User = await this._userRepository.findOne({
+        where: { id },
+      });
       return user;
     } catch (err) {
       Logger.error(err.message, err.stack, '[UserService.findOneById]');
@@ -47,7 +51,7 @@ export class UserService {
     } catch (err) {
       Logger.error(err.message, err.stack, '[UserService.create]');
       await queryRunner.rollbackTransaction();
-      throw new ApolloError('Failed to create user.', 'USER_CREATE_FAILED');
+      throw new ServerError('Failed to create user.', 'USER_CREATE_FAILED');
     } finally {
       await queryRunner.release();
     }
@@ -63,23 +67,20 @@ export class UserService {
     try {
       const user: User | null = await this.findOneById(userId);
       if (!user) {
-        throw new ApolloError('User not found.', 'USER_NOT_FOUND');
+        throw new RequestError('User not found.', 'USER_NOT_FOUND');
       }
       Object.assign(user, userUpdateInput);
-      await queryRunner.manager.update(
-        User,
-        {
-          where: { id: userId },
-        },
-        user,
-      );
+      await queryRunner.manager.update(User, userId, user);
       await queryRunner.commitTransaction();
 
       return user;
     } catch (err) {
       Logger.error(err.message, err.stack, '[UserService.update]');
       await queryRunner.rollbackTransaction();
-      throw new ApolloError('Failed to update user.', 'USER_UPDATE_FAILED');
+      if (err instanceof ApolloError) {
+        throw err;
+      }
+      throw new ServerError('Failed to update user.', 'USER_UPDATE_FAILED');
     } finally {
       await queryRunner.release();
     }
