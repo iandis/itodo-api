@@ -1,5 +1,7 @@
-import { ObjectType } from '@nestjs/graphql';
-import { TodoUpdateResponse } from './todo-update.response';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class TodoDeleteResponse extends TodoUpdateResponse {}
+export class TodoDeleteResponse {
+  @Field(() => Boolean)
+  success: boolean;
+}
