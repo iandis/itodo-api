@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { ApolloError } from 'apollo-server-express';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
+import { ServerError } from 'src/shared/errors/server.error';
 
 export const graphqlErrorHandler = (
   err: GraphQLError,
@@ -17,9 +17,9 @@ export const graphqlErrorHandler = (
     Logger.error(err.message, err.stack, `${err.path?.toString() || ''}`);
   }
   if (err.extensions?.exception?.sqlState) {
-    return new ApolloError('Something is wrong', 'INTERNAL_SERVER_ERROR');
+    return new ServerError('Something is wrong', 'INTERNAL_SERVER_ERROR');
   }
-  return new ApolloError(
+  return new ServerError(
     err.extensions?.exception?.response?.message || err.message,
     err.extensions?.code || 'INTERNAL_SERVER_ERROR',
   );
