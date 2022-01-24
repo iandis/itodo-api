@@ -50,9 +50,15 @@ export class TodoService {
     const { id } = todoDetailInput;
     try {
       const todo: Todo = await this._internalFindOneById(id);
+      if (!todo) {
+        throw new RequestError('Todo not found.', 'TODO_NOT_FOUND');
+      }
       return todo;
     } catch (err) {
       Logger.error(err.message, err.stack, '[TodoService.findOneById]');
+      if (err instanceof ApolloError) {
+        throw err;
+      }
       throw new ServerError('Failed to find todo.', 'TODO_FIND_FAILED');
     }
   }
