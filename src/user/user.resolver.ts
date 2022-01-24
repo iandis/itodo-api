@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AppAuthGuard } from 'src/auth/app-auth.guard';
 import { CurrentUser } from 'src/auth/current-user';
 import { UserUpdateInput } from './dto/request/user-update.input';
@@ -10,6 +10,11 @@ import { UserService } from './user.service';
 @UseGuards(AppAuthGuard)
 export class UserResolver {
   constructor(private readonly _userService: UserService) {}
+
+  @Query(() => UserResponse)
+  userDetail(@CurrentUser() userId: string): Promise<UserResponse> {
+    return this._userService.findOneById(userId);
+  }
 
   @Mutation(() => UserResponse)
   userCreate(
